@@ -1,10 +1,12 @@
 package classwork.my_spring.irobor_my_spring;
 
-import classwork.my_spring.irobor_my_spring.annotations.inject_random_type.InjectRandomInt;
+import classwork.my_spring.irobor_my_spring.annotations.InjectRandomInt.InjectRandomInt;
+import classwork.my_spring.irobor_my_spring.annotations.component.Component;
 
 /**
  * @author Evgeny Borisov
  */
+@Component
 public class CleanerImpl implements Cleaner {
     @InjectRandomInt(min=3,max=7)
     private int repeat;

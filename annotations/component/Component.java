@@ -1,11 +1,12 @@
-package classwork.my_spring.irobor_my_spring.annotations.InjectRandomInt;
+package classwork.my_spring.irobor_my_spring.annotations.component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface InjectByType {
+@Target(ElementType.TYPE)
+public @interface Component {
+    boolean lazy() default false;
 }

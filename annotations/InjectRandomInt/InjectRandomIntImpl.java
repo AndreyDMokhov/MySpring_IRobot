@@ -1,6 +1,6 @@
-package classwork.my_spring.irobor_my_spring.annotations.inject_random_type;
+package classwork.my_spring.irobor_my_spring.annotations.InjectRandomInt;
 
-import classwork.my_spring.irobor_my_spring.configurations.ObjectConfigurator;
+import classwork.my_spring.irobor_my_spring.configurations.ObjectConfiguratorOfAnnotation;
 import homework.exercises.RandomUtil;
 import lombok.SneakyThrows;
 import org.reflections.ReflectionUtils;
@@ -8,7 +8,7 @@ import org.reflections.ReflectionUtils;
 import java.lang.reflect.Field;
 import java.util.Set;
 
-public class InjectRandomIntImpl implements ObjectConfigurator {
+public class InjectRandomIntImpl implements ObjectConfiguratorOfAnnotation {
 
         @Override
         @SneakyThrows

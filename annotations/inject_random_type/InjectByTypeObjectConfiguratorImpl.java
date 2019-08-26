@@ -1,14 +1,14 @@
-package classwork.my_spring.irobor_my_spring.annotations.InjectRandomInt;
+package classwork.my_spring.irobor_my_spring.annotations.inject_random_type;
 
-import classwork.my_spring.irobor_my_spring.ObjectFactory;
-import classwork.my_spring.irobor_my_spring.configurations.ObjectConfigurator;
+import classwork.my_spring.irobor_my_spring.boot.ObjectFactory;
+import classwork.my_spring.irobor_my_spring.configurations.ObjectConfiguratorOfAnnotation;
 import lombok.SneakyThrows;
 import org.reflections.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.Set;
 
-public class InjectbyTypeObjectConfiguratorImpl implements ObjectConfigurator {
+public class InjectByTypeObjectConfiguratorImpl implements ObjectConfiguratorOfAnnotation {
     @Override
     @SneakyThrows
     public void configurator(Object o) {
@@ -18,7 +18,5 @@ public class InjectbyTypeObjectConfiguratorImpl implements ObjectConfigurator {
             Object object = ObjectFactory.getInstance().createObject(field.getType());
             field.set(o,object);
         }
-
-                ;
     }
 }

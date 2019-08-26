@@ -1,4 +1,4 @@
-package classwork.my_spring.irobor_my_spring.annotations.inject_random_type;/**
+package classwork.my_spring.irobor_my_spring.annotations.InjectRandomInt;/**
  * @author Evgeny Borisov
  */
 
