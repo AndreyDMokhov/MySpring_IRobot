@@ -25,12 +25,7 @@ public class ObjectFactory {
         applicationContext = ApplicationContext.getInstance();
     }
 
-    @SneakyThrows
-    public <T> T createObject(Class<T> type) {
-        type=resolveImpl(type);
-        T t = createInst(type);
-        return t;
-    }
+
 
     private <T> T createInst(Class<T> type) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
       return   type.getDeclaredConstructor().newInstance();

@@ -2,37 +2,28 @@ package classwork.my_spring.irobor_my_spring.boot;
 
 import classwork.my_spring.irobor_my_spring.annotations.component.Component;
 import classwork.my_spring.irobor_my_spring.configurations.ObjectConfiguratorOfAnnotation;
+import classwork.my_spring.irobor_my_spring.configurations.ProxyConfigurator;
 import lombok.SneakyThrows;
-import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class BeanFactory {
-
-    private Reflections scanner;
-    private List<ObjectConfiguratorOfAnnotation> configuratorsByAnnotations;
-    private Map<Class<?>, Object> context = new HashMap<>();
-
-    private BeanFactory() {
-
-    }
-
+    private BeanFactory() {}
     public static BeanFactory getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
-    public Map<Class<?>, Object> getContext() {
-        return context;
-    }
+    private List<ObjectConfiguratorOfAnnotation> configuratorsByAnnotations;
+    private Map<Class<?>, Object> beanContext = new HashMap<>();
+
 
     @SneakyThrows
     public void createContext(String packageName) {
-        scanner = new Reflections(packageName);
+        Reflections scanner = new Reflections(packageName);
         Set<Class<?>> classes = scanner.getTypesAnnotatedWith(Component.class);
         for (Class<?> aClass : classes) {
            Component annotation = aClass.getAnnotation(Component.class);
@@ -45,26 +36,34 @@ public class BeanFactory {
     }
     @SneakyThrows
     private Object putInContext(Class<?> clazz) {
-        Object bean = context.put(clazz, clazz.getDeclaredConstructor().newInstance());
-        return context.get(clazz);
+         beanContext.put(clazz, clazz.getDeclaredConstructor().newInstance());
+        return beanContext.get(clazz);
     }
 
 
     public void populateProperties(List<ObjectConfiguratorOfAnnotation> configuratorsByAnnotations) {
         this.configuratorsByAnnotations = configuratorsByAnnotations;
-        for (Object bean : context.values()) {
+        for (Object bean : beanContext.values()) {
             populateProperty(bean);
+        }
+    }
+    void proxyWrapIfNeeded(List<ProxyConfigurator> proxyConfigurators) {
+        for (Map.Entry<Class<?>, Object> classObjectEntry : beanContext.entrySet()) {
+            for (ProxyConfigurator proxyConfigurator : proxyConfigurators) {
+                Object wrappedObj = proxyConfigurator.wrapObjectProxy(classObjectEntry.getValue(), classObjectEntry.getKey());
+                beanContext.replace(classObjectEntry.getKey(), wrappedObj);
+            }
         }
     }
 
     @SneakyThrows
-    public Object getBean(Class<?> beanClass) {
+     Object getBean(Class<?> beanClass) {
 
-        Object bean = context.get(beanClass) ;
+        Object bean = beanContext.get(beanClass) ;
         if (bean == null) {
             populateProperty(putInContext(beanClass));
          }
-        return context.get(beanClass);
+        return beanContext.get(beanClass);
     }
 
     private void populateProperty( Object bean) {

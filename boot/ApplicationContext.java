@@ -3,6 +3,7 @@ package classwork.my_spring.irobor_my_spring.boot;
 import classwork.my_spring.irobor_my_spring.configurations.Config;
 import classwork.my_spring.irobor_my_spring.configurations.JavaConfig;
 import classwork.my_spring.irobor_my_spring.configurations.ObjectConfiguratorOfAnnotation;
+import classwork.my_spring.irobor_my_spring.configurations.ProxyConfigurator;
 import lombok.SneakyThrows;
 import org.reflections.Reflections;
 
@@ -13,6 +14,7 @@ import java.util.Set;
 public class ApplicationContext {
     private Config javaConfig;
     private List<ObjectConfiguratorOfAnnotation> configuratorsByAnnotations = new ArrayList<>();
+    private List<ProxyConfigurator> proxyConfigurators = new ArrayList<>();
     private BeanFactory beanFactory = BeanFactory.getInstance();
 
     private ApplicationContext() {
@@ -51,24 +53,25 @@ public class ApplicationContext {
         getAllObjectConfiguration(packageName);
         beanFactory.createContext(packageName);
         beanFactory.populateProperties(configuratorsByAnnotations);
-    }
+        beanFactory.proxyWrapIfNeeded(proxyConfigurators);
 
-    public Object getImplObj(Class<?> type) {
-        Class<?> implClass = javaConfig.getImplClass(type);
-        return getBean(implClass);
     }
 
     @SneakyThrows
     private void getAllObjectConfiguration(String packageName) {
         Reflections scanner = new Reflections(packageName);
-        Set<Class<? extends ObjectConfiguratorOfAnnotation>> subTypesOf = scanner.getSubTypesOf(ObjectConfiguratorOfAnnotation.class);
-        for (Class<? extends ObjectConfiguratorOfAnnotation> aClass : subTypesOf) {
+        Set<Class<? extends ObjectConfiguratorOfAnnotation>> annotationConfig = scanner.getSubTypesOf(ObjectConfiguratorOfAnnotation.class);
+        Set<Class<? extends ProxyConfigurator>> proxyConfig = scanner.getSubTypesOf(ProxyConfigurator.class);
+        for (Class<? extends ObjectConfiguratorOfAnnotation> aClass : annotationConfig) {
             configuratorsByAnnotations.add(aClass.getDeclaredConstructor().newInstance());
+        }
+        for (Class<? extends ProxyConfigurator> aClass : proxyConfig) {
+            proxyConfigurators.add(aClass.getDeclaredConstructor().newInstance());
         }
         javaConfig = new JavaConfig();
     }
 
-    Config getJavaConfig() {
+     Config getJavaConfig() {
         return javaConfig;
     }
 
