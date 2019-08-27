@@ -40,15 +40,22 @@ public class ApplicationContext {
         return this;
     }
 
-    public <T> T getBean(Class<T> beanName) {
-
-         return (T) beanFactory.getBean(beanName);
+    public <T> T getBean(Class<T> beanClass) {
+        if (beanClass.isInterface()) {
+            beanClass = javaConfig.getImplClass(beanClass);
+        }
+        return (T) beanFactory.getBean(beanClass);
     }
 
     private void createAppContext(String packageName) {
         getAllObjectConfiguration(packageName);
         beanFactory.createContext(packageName);
         beanFactory.populateProperties(configuratorsByAnnotations);
+    }
+
+    public Object getImplObj(Class<?> type) {
+        Class<?> implClass = javaConfig.getImplClass(type);
+        return getBean(implClass);
     }
 
     @SneakyThrows
@@ -61,15 +68,9 @@ public class ApplicationContext {
         javaConfig = new JavaConfig();
     }
 
-
-    private <T> void configure(T t) {
-        configuratorsByAnnotations.forEach(configurator -> configurator.configurator(t));
-    }
-
     Config getJavaConfig() {
         return javaConfig;
     }
-
 
 
 }

@@ -3,6 +3,7 @@ package classwork.my_spring.irobor_my_spring.boot;
 import classwork.my_spring.irobor_my_spring.annotations.component.Component;
 import classwork.my_spring.irobor_my_spring.configurations.ObjectConfiguratorOfAnnotation;
 import lombok.SneakyThrows;
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Proxy;
@@ -15,6 +16,8 @@ public class BeanFactory {
 
     private Reflections scanner;
     private List<ObjectConfiguratorOfAnnotation> configuratorsByAnnotations;
+    private Map<Class<?>, Object> context = new HashMap<>();
+
     private BeanFactory() {
 
     }
@@ -23,15 +26,16 @@ public class BeanFactory {
         return SingletonHolder.INSTANCE;
     }
 
-    private Map<Class<?>, Object> context = new HashMap<>();
-
+    public Map<Class<?>, Object> getContext() {
+        return context;
+    }
 
     @SneakyThrows
     public void createContext(String packageName) {
         scanner = new Reflections(packageName);
         Set<Class<?>> classes = scanner.getTypesAnnotatedWith(Component.class);
         for (Class<?> aClass : classes) {
-            Component annotation = aClass.getAnnotation(Component.class);
+           Component annotation = aClass.getAnnotation(Component.class);
             if (annotation.lazy()){
                 continue;
             }
@@ -54,13 +58,13 @@ public class BeanFactory {
     }
 
     @SneakyThrows
-    public Object getBean(Class<?> beanName) {
-          ;
-        Object bean = context.get(beanName) ;
+    public Object getBean(Class<?> beanClass) {
+
+        Object bean = context.get(beanClass) ;
         if (bean == null) {
-            populateProperty(putInContext(beanName));
+            populateProperty(putInContext(beanClass));
          }
-        return context.get(beanName);
+        return context.get(beanClass);
     }
 
     private void populateProperty( Object bean) {
