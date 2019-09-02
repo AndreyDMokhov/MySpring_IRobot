@@ -12,8 +12,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class BeanFactory {
-    private BeanFactory() {}
-    public static BeanFactory getInstance() {
+
+   private BeanFactory() {
+    }
+
+     static BeanFactory getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
@@ -22,31 +25,32 @@ public class BeanFactory {
 
 
     @SneakyThrows
-    public void createContext(String packageName) {
-        Reflections scanner = new Reflections(packageName);
+    void createContext(Reflections scanner) {
         Set<Class<?>> classes = scanner.getTypesAnnotatedWith(Component.class);
         for (Class<?> aClass : classes) {
-           Component annotation = aClass.getAnnotation(Component.class);
-            if (annotation.lazy()){
+            Component annotation = aClass.getAnnotation(Component.class);
+            if (annotation.lazy()) {
                 continue;
             }
             putInContext(aClass);
 
         }
     }
+
     @SneakyThrows
     private Object putInContext(Class<?> clazz) {
-         beanContext.put(clazz, clazz.getDeclaredConstructor().newInstance());
+        beanContext.put(clazz, clazz.getDeclaredConstructor().newInstance());
         return beanContext.get(clazz);
     }
 
 
-    public void populateProperties(List<ObjectConfiguratorOfAnnotation> configuratorsByAnnotations) {
+    void populateProperties(List<ObjectConfiguratorOfAnnotation> configuratorsByAnnotations) {
         this.configuratorsByAnnotations = configuratorsByAnnotations;
         for (Object bean : beanContext.values()) {
             populateProperty(bean);
         }
     }
+
     void proxyWrapIfNeeded(List<ProxyConfigurator> proxyConfigurators) {
         for (Map.Entry<Class<?>, Object> classObjectEntry : beanContext.entrySet()) {
             for (ProxyConfigurator proxyConfigurator : proxyConfigurators) {
@@ -57,16 +61,15 @@ public class BeanFactory {
     }
 
     @SneakyThrows
-     Object getBean(Class<?> beanClass) {
-
-        Object bean = beanContext.get(beanClass) ;
+    Object getBean(Class<?> beanClass) {
+        Object bean = beanContext.get(beanClass);
         if (bean == null) {
             populateProperty(putInContext(beanClass));
-         }
+        }
         return beanContext.get(beanClass);
     }
 
-    private void populateProperty( Object bean) {
+    private void populateProperty(Object bean) {
         for (ObjectConfiguratorOfAnnotation configuratorsByAnnotation : configuratorsByAnnotations) {
             configuratorsByAnnotation.configurator(bean);
         }

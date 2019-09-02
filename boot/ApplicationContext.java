@@ -25,7 +25,7 @@ public class ApplicationContext {
         return SingletonHolder.INSTANCE;
     }
 
-    private Reflections reflections = new Reflections();
+    private Reflections scanner;
 
     private static class SingletonHolder {
         private static final ApplicationContext INSTANCE = new ApplicationContext();
@@ -36,9 +36,9 @@ public class ApplicationContext {
         return getInstance().runner(packageName);
     }
 
-    private ApplicationContext runner(String... args) {
+    private ApplicationContext runner(String packageName) {
 
-        createAppContext(args[0]);
+        createAppContext(packageName);
         return this;
     }
 
@@ -50,16 +50,17 @@ public class ApplicationContext {
     }
 
     private void createAppContext(String packageName) {
-        getAllObjectConfiguration(packageName);
-        beanFactory.createContext(packageName);
+        scanner = new Reflections(packageName);
+        getAllObjectConfiguration(scanner);
+        beanFactory.createContext(scanner);
         beanFactory.populateProperties(configuratorsByAnnotations);
         beanFactory.proxyWrapIfNeeded(proxyConfigurators);
 
     }
 
     @SneakyThrows
-    private void getAllObjectConfiguration(String packageName) {
-        Reflections scanner = new Reflections(packageName);
+    private void getAllObjectConfiguration(Reflections scanner) {
+
         Set<Class<? extends ObjectConfiguratorOfAnnotation>> annotationConfig = scanner.getSubTypesOf(ObjectConfiguratorOfAnnotation.class);
         Set<Class<? extends ProxyConfigurator>> proxyConfig = scanner.getSubTypesOf(ProxyConfigurator.class);
         for (Class<? extends ObjectConfiguratorOfAnnotation> aClass : annotationConfig) {
